@@ -48,11 +48,11 @@ func TimeWheel() {
 				}
 				// 心跳监测
 				bytes, _ := json.Marshal(models.Message{Mid: uuid.NewString(), Types: models.HeartbeatPublish})
-				write(client, bytes)
+				write(client, models.HeartbeatPublish, bytes)
 				// 信息重试
 				for _, message := range messageMap {
 					mb, _ := json.Marshal(message)
-					write(client, mb)
+					write(client, message.Types, mb)
 				}
 			}
 		}
@@ -85,8 +85,11 @@ func retry(key string, msg *models.Message) {
 	}
 }
 
-func write(client *models.Client, bytes []byte) {
-	log.Printf("发送消息=========>>>>>#%s#", string(bytes))
+func write(client *models.Client, mt models.MessageType, bytes []byte) {
+	if mt != models.HeartbeatPublish && mt != models.HeartbeatAck {
+		// 打印心跳消息
+		log.Printf("发送消息=========>>>>>#%s#", string(bytes))
+	}
 	_, err := client.Conn.Write(bytes)
 	if err != nil {
 		// 删除链接

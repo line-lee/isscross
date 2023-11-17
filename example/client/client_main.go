@@ -3,18 +3,13 @@ package main
 import (
 	"log"
 	"sunflower/common/models"
-	"sunflower/sdk"
+	"sunflower/petal"
 )
 
 func main() {
-	sdk.New(&models.ClientConfig{
-		Network: "tcp",
-		Address: "127.0.0.1",
-		Port:    24763,
-	}).ShareSubscribe(handle)
+	petal.Start(&models.ClientConfig{Network: "tcp", Address: "127.0.0.1", Port: 24763}).Listen(handle)
 
 	<-make(chan bool)
-
 }
 
 func handle(message []byte) {

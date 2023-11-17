@@ -10,8 +10,8 @@ type Client struct {
 	Config *ClientConfig
 	// tcp连接
 	Conn net.Conn
-	// 连接成功
-	IsConnectSuccess bool
+	// 上次重连时间
+	ReconnectTime int64
 	// 链接唯一标识
 	UUID string
 	// 互斥锁

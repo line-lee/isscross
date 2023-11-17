@@ -1,4 +1,4 @@
-package sdk
+package petal
 
 import (
 	"encoding/json"
@@ -10,6 +10,11 @@ import (
 
 func listen() {
 	for {
+		if thisConnect.Conn == nil {
+			reconnect()
+			time.Sleep(time.Second)
+			continue
+		}
 		var buf = make([]byte, 1024)
 		_, err := thisConnect.Conn.Read(buf)
 		if err != nil {
@@ -27,9 +32,11 @@ func listen() {
 var sc = make(chan []byte, 102400)
 
 func process(buf []byte) {
-	log.Printf("sunflower 收到消息=========>>>>>#%s#\n", string(buf))
 	mm := new(models.Message)
 	_ = json.Unmarshal(buf, mm)
+	if mm.Types != models.HeartbeatPublish && mm.Types != models.HeartbeatAck {
+		log.Printf("sunflower 收到消息=========>>>>>#%s#\n", string(buf))
+	}
 	thisTime := time.Now().Unix()
 	switch mm.Types {
 	case models.HeartbeatPublish:
@@ -39,7 +46,7 @@ func process(buf []byte) {
 		thisConnect.HeartbeatPullTime = thisTime
 		mm.Types = models.HeartbeatAck
 		bytes, _ := json.Marshal(mm)
-		write(thisConnect, bytes)
+		write(thisConnect, mm.Types, bytes)
 	case models.HeartbeatAck:
 		// 本方心跳问询，对方回执成功，更新链接对象本方链接问询心跳时间戳
 		thisConnect.Mutex.Lock()
@@ -50,7 +57,7 @@ func process(buf []byte) {
 		sc <- mm.Content
 		mm.Types = models.ShareACK
 		bytes, _ := json.Marshal(mm)
-		write(thisConnect, bytes)
+		write(thisConnect, mm.Types, bytes)
 	case models.ShareACK:
 		// 收到内存共享信息回执，删除消息重试map
 		delete(mem, mm.Mid)

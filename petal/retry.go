@@ -1,4 +1,4 @@
-package sdk
+package petal
 
 import (
 	"encoding/json"
@@ -6,27 +6,36 @@ import (
 	"log"
 	"net"
 	"sunflower/common/models"
+	"sync"
 	"time"
 )
 
 var retry = make(chan int)
 
+var connectLock sync.Mutex
+
 func reconnect() {
 	log.Printf("sunflower 触发重连机制================>>>>>>>>\n")
 	for {
-		thisConnect.Mutex.Lock()
+		connectLock.Lock()
+		var thisTime = time.Now().Unix()
+		const reconnectLimit = 60 // 重连成功后，再次重连得等1min
+		if thisTime-thisConnect.ReconnectTime < reconnectLimit {
+			log.Printf("sunflower 触发重连机制，重连成功[%d]秒，不再次触发\n", thisTime-thisConnect.ReconnectTime)
+			return
+		}
 		conn, err := net.DialTimeout(thisConnect.Config.Network, fmt.Sprintf("%s:%d", thisConnect.Config.Address, thisConnect.Config.Port), 3*time.Second)
 		if err != nil {
-			log.Printf("sunflower 触发重连机制，新建链接报错：%v", err)
-			thisConnect.Mutex.Unlock()
+			log.Printf("sunflower 触发重连机制，新建链接报错：%v\n", err)
+			connectLock.Unlock()
 			time.Sleep(time.Second)
 			continue
 		}
 		thisConnect.Conn = conn
-		var thisTime = time.Now().Unix()
 		thisConnect.HeartbeatPullTime = thisTime
 		thisConnect.HeartbeatPushTime = thisTime
-		thisConnect.Mutex.Unlock()
+		thisConnect.ReconnectTime = thisTime
+		connectLock.Unlock()
 		log.Printf("sunflower 重连成功！！！！！！！！！！！！！！\n")
 		return
 	}
@@ -44,14 +53,23 @@ func resend() {
 			message.Mutex.Unlock()
 			continue
 		}
+		mem[key].Retry++
 		bytes, _ := json.Marshal(message)
-		write(thisConnect, bytes)
+		write(thisConnect, message.Types, bytes)
 		message.Mutex.Unlock()
 	}
 }
 
-func write(client *models.Client, bytes []byte) {
-	log.Printf("suflower 发送消息=========>>>>>#%s#", string(bytes))
+func write(client *models.Client, mt models.MessageType, bytes []byte) {
+	if mt != models.HeartbeatPublish && mt != models.HeartbeatAck {
+		// 打印心跳消息
+		log.Printf("suflower 发送消息=========>>>>>#%s#", string(bytes))
+	}
+	if client.Conn == nil {
+		log.Printf("suflower 向服务端发送消息，连接为空\n")
+		reconnect()
+		return
+	}
 	_, err := client.Conn.Write(bytes)
 	if err != nil {
 		log.Printf("suflower 向服务端发送消息错误：%v\n", err)

@@ -1,4 +1,4 @@
-package sdk
+package petal
 
 import (
 	"encoding/json"
@@ -9,8 +9,8 @@ import (
 
 func heartbeatPush() {
 	for {
-		time.Sleep(10 * time.Second)
+		time.Sleep(20 * time.Second)
 		bytes, _ := json.Marshal(models.Message{Mid: uuid.NewString(), Types: models.HeartbeatPublish})
-		write(thisConnect, bytes)
+		write(thisConnect, models.HeartbeatPublish, bytes)
 	}
 }

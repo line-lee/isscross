@@ -9,9 +9,11 @@ import (
 )
 
 func process(cli *models.Client, mb []byte) {
-	log.Printf("收到消息=========>>>>>#%s#\n", string(mb))
 	mm := new(models.Message)
 	_ = json.Unmarshal(mb, mm)
+	if mm.Types != models.HeartbeatPublish && mm.Types != models.HeartbeatAck {
+		log.Printf("收到消息=========>>>>>#%s#\n", string(mb))
+	}
 	thisTime := time.Now().Unix()
 	switch mm.Types {
 	case models.HeartbeatPublish:
@@ -20,7 +22,7 @@ func process(cli *models.Client, mb []byte) {
 		defer cli.Mutex.Unlock()
 		cli.HeartbeatPullTime = thisTime
 		mb, _ := json.Marshal(models.Message{Mid: mm.Mid, Types: models.HeartbeatAck})
-		write(cli, mb)
+		write(cli, models.HeartbeatAck, mb)
 	case models.HeartbeatAck:
 		// 本方心跳问询，对方回执成功，更新链接对象本方链接问询心跳时间戳
 		cli.Mutex.Lock()
@@ -29,6 +31,9 @@ func process(cli *models.Client, mb []byte) {
 	case models.ShareSource:
 		// 收到应用端的发布消息，广播给同组的所有连接
 		for _, cp := range clientPool {
+			if cp.UUID == cli.UUID {
+				continue
+			}
 			// 复制消息
 			push := new(models.Message)
 			_ = json.Unmarshal(mb, push)
@@ -38,8 +43,11 @@ func process(cli *models.Client, mb []byte) {
 			messageMap[push.Mid] = push
 			// 发送消息
 			pby, _ := json.Marshal(push)
-			write(cp, pby)
+			write(cp, push.Types, pby)
 		}
+		mm.Types = models.ShareACK
+		kb, _ := json.Marshal(mm)
+		write(cli, mm.Types, kb)
 	case models.ShareACK:
 		// 收到消息回执，清理重试map中的key
 		delete(messageMap, mm.Mid)
