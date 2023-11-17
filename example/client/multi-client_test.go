@@ -13,7 +13,7 @@ import (
 
 func TestClient1(t *testing.T) {
 	rand.NewSource(time.Now().UnixNano())
-	petal.Start(&models.ClientConfig{Network: "tcp", Address: "127.0.0.1", Port: 24763}).Listen(client1Handle)
+	petal.Start(&models.ClientConfig{Address: "127.0.0.1:24763"}).Listen(client1Handle)
 	tool.SecureGo(func(args ...interface{}) {
 		client1Share()
 	})
@@ -38,7 +38,7 @@ func client1Handle(message []byte) {
 
 func TestClient2(t *testing.T) {
 	rand.NewSource(time.Now().UnixNano())
-	petal.Start(&models.ClientConfig{Network: "tcp", Address: "127.0.0.1", Port: 24763}).Listen(client2Handle)
+	petal.Start(&models.ClientConfig{Address: "127.0.0.1:24763"}).Listen(client2Handle)
 	tool.SecureGo(func(args ...interface{}) {
 		client2Share()
 	})

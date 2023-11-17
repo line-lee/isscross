@@ -1,17 +1,24 @@
 package main
 
 import (
-	"log"
 	"sunflower/common/models"
 	"sunflower/petal"
 )
 
 func main() {
-	petal.Start(&models.ClientConfig{Network: "tcp", Address: "127.0.0.1", Port: 24763}).Listen(handle)
+	// 配置部署好的服务端地址，一定记得要开tcp端口，例如：127.0.0.1:24763
+	petal.Start(&models.ClientConfig{Address: "your address"}).Listen(handle)
 
-	<-make(chan bool)
+	// ..............
+
+	// 客户端向其他连接分享消息示例
+	str := "share anything"
+	petal.Share([]byte(str))
+
+	// run main   .......
 }
 
 func handle(message []byte) {
-	log.Printf("客户端收到信息：%s\n", string(message))
+	// listen message to do something...........
+
 }

@@ -2,15 +2,12 @@ package petal
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net"
 	"sunflower/common/models"
 	"sync"
 	"time"
 )
-
-var retry = make(chan int)
 
 var connectLock sync.Mutex
 
@@ -24,7 +21,7 @@ func reconnect() {
 			log.Printf("sunflower 触发重连机制，重连成功[%d]秒，不再次触发\n", thisTime-thisConnect.ReconnectTime)
 			return
 		}
-		conn, err := net.DialTimeout(thisConnect.Config.Network, fmt.Sprintf("%s:%d", thisConnect.Config.Address, thisConnect.Config.Port), 3*time.Second)
+		conn, err := net.DialTimeout("tcp", thisConnect.Config.Address, 3*time.Second)
 		if err != nil {
 			log.Printf("sunflower 触发重连机制，新建链接报错：%v\n", err)
 			connectLock.Unlock()

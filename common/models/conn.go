@@ -23,9 +23,8 @@ type Client struct {
 }
 
 type ClientConfig struct {
-	Network string
+	//Network string  // 默认值TCP
 	Address string
-	Port    int
 }
 
 type MessageType string
