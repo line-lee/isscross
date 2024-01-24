@@ -1,8 +1,8 @@
 package main
 
 import (
-	"sunflower/common/models"
-	"sunflower/petal"
+	"github.com/line-lee/sunflower/common/models"
+	"github.com/line-lee/sunflower/petal"
 )
 
 func main() {

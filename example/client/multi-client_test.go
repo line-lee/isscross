@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"sunflower/common/models"
-	tool "sunflower/common/tools"
-	"sunflower/petal"
+	"github.com/line-lee/sunflower/common/models"
+	tool "github.com/line-lee/sunflower/common/tools"
+	"github.com/line-lee/sunflower/petal"
 	"testing"
 	"time"
 )
