@@ -2,9 +2,9 @@ package petal
 
 import (
 	"encoding/json"
+	"github.com/line-lee/isscross/common/models"
 	"log"
 	"net"
-	"sunflower/common/models"
 	"sync"
 	"time"
 )
@@ -12,18 +12,18 @@ import (
 var connectLock sync.Mutex
 
 func reconnect() {
-	log.Printf("sunflower 触发重连机制================>>>>>>>>\n")
+	log.Printf("isscross 触发重连机制================>>>>>>>>\n")
 	for {
 		connectLock.Lock()
 		var thisTime = time.Now().Unix()
 		const reconnectLimit = 60 // 重连成功后，再次重连得等1min
 		if thisTime-thisConnect.ReconnectTime < reconnectLimit {
-			log.Printf("sunflower 触发重连机制，重连成功[%d]秒，不再次触发\n", thisTime-thisConnect.ReconnectTime)
+			log.Printf("isscross 触发重连机制，重连成功[%d]秒，不再次触发\n", thisTime-thisConnect.ReconnectTime)
 			return
 		}
 		conn, err := net.DialTimeout("tcp", thisConnect.Config.Address, 3*time.Second)
 		if err != nil {
-			log.Printf("sunflower 触发重连机制，新建链接报错：%v\n", err)
+			log.Printf("isscross 触发重连机制，新建链接报错：%v\n", err)
 			connectLock.Unlock()
 			time.Sleep(time.Second)
 			continue
@@ -33,7 +33,7 @@ func reconnect() {
 		thisConnect.HeartbeatPushTime = thisTime
 		thisConnect.ReconnectTime = thisTime
 		connectLock.Unlock()
-		log.Printf("sunflower 重连成功！！！！！！！！！！！！！！\n")
+		log.Printf("isscross 重连成功！！！！！！！！！！！！！！\n")
 		return
 	}
 }

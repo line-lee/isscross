@@ -3,9 +3,9 @@ package petal
 import (
 	"encoding/json"
 	"github.com/google/uuid"
+	"github.com/line-lee/isscross/common/models"
+	tool "github.com/line-lee/isscross/common/tools"
 	"log"
-	"sunflower/common/models"
-	tool "sunflower/common/tools"
 )
 
 var thisConnect *models.Client
@@ -38,7 +38,7 @@ func (p *petal) Listen(handle func(message []byte)) {
 
 func Share(message []byte) {
 	if len(message) > 1024 {
-		log.Printf("sunflower 应用端发起消息内容过大\n")
+		log.Printf("isscross 应用端发起消息内容过大\n")
 		return
 	}
 	m := &models.Message{Mid: uuid.NewString(), Types: models.ShareSource, Content: message}

@@ -1,4 +1,4 @@
-module sunflower
+module github.com/line-lee/isscross
 
 go 1.18
 

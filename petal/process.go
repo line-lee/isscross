@@ -2,9 +2,9 @@ package petal
 
 import (
 	"encoding/json"
+	"github.com/line-lee/isscross/common/models"
 	"log"
 	"regexp"
-	"sunflower/common/models"
 	"time"
 )
 
@@ -18,7 +18,7 @@ func listen() {
 		var buf = make([]byte, 1024)
 		_, err := thisConnect.Conn.Read(buf)
 		if err != nil {
-			log.Printf("sunflower 应用端使用长连接读取数据报错，链接中断：%v", err)
+			log.Printf("isscross 应用端使用长连接读取数据报错，链接中断：%v", err)
 			reconnect()
 			continue
 		}
@@ -35,7 +35,7 @@ func process(buf []byte) {
 	mm := new(models.Message)
 	_ = json.Unmarshal(buf, mm)
 	if mm.Types != models.HeartbeatPublish && mm.Types != models.HeartbeatAck {
-		log.Printf("sunflower 收到消息=========>>>>>#%s#\n", string(buf))
+		log.Printf("isscross 收到消息=========>>>>>#%s#\n", string(buf))
 	}
 	thisTime := time.Now().Unix()
 	switch mm.Types {
@@ -62,7 +62,7 @@ func process(buf []byte) {
 		// 收到内存共享信息回执，删除消息重试map
 		delete(mem, mm.Mid)
 	default:
-		log.Printf("sunflower 应用端解析消息类型错误：%v\n", mm.Types)
+		log.Printf("isscross 应用端解析消息类型错误：%v\n", mm.Types)
 		return
 	}
 }

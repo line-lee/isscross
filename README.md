@@ -1,4 +1,4 @@
-# sunflower
+# isscross
 使用golang开发的，一个轻量级消息广播项目。服务和客户端双向链接，形成太阳花的形状，做到每个花瓣信息共享
 
 # 快速使用
@@ -8,11 +8,11 @@ package main
 
 import (
 	"fmt"
-	"sunflower/server/core"
+	"github.com/line-lee/isscross/server/core"
 )
 
 func main() {
-	fmt.Println("========================== sunflower start ======================================")
+	fmt.Println("========================== isscross start ======================================")
 	// 启动连接池心跳循环自检
 	core.TimeWheel()
 	// 创建服务，接收连接，填充连接池数据
@@ -23,15 +23,15 @@ func main() {
 
 go version go1.18.5 linux/amd64
 go mod tidy
-go build -i -o ./bin/sunflower  server/main.go
+go build -i -o ./bin/isscross  server/main.go
 ```
 ##客户端调用
 ```
 package main
 
 import (
-	"sunflower/common/models"
-	"sunflower/petal"
+	"github.com/line-lee/isscross/common/models"
+	"github.com/line-lee/isscross/petal"
 )
 
 func main() {
